@@ -64,7 +64,8 @@
                 onDeleteComplete: function(id, xhrOrXdr, isError) {},
                 onPasteReceived: function(blob) {},
                 onStatusChange: function(id, oldStatus, newStatus) {},
-                onSessionRequestComplete: function(response, success, xhrOrXdr) {}
+                onSessionRequestComplete: function(response, success, xhrOrXdr) {},
+                onResizeImage: function(resizeInfo) {}
             },
 
             messages: {

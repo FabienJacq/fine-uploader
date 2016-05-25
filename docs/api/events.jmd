@@ -263,6 +263,32 @@ Useful for implementing a progress bar.
     ])
 }}
 
+{{ api_event("resizeImage", "onUploadChunk",
+""" Called just before an image is resized. This is a promissory handler. In fact, if a promise is _not_ returned, it is
+assumed that the internal resize algorithm should be used instead. If you don't want to provide your own code to handle
+image resizing, simply omit a handler for this event.
+
+If you _do_ want to use an alternate scaling library, you must contribute a handler for this event and return a `Promise`.
+Once the resize is complete, your promise must be fulfilled, passing an argument of an `HTMLCanvasElement` with the resized
+image drawn onto it. You may, of course, reject your returned `Promise` is the resize fails in some way.
+
+The `resizeInfo` object, which is passed into the event handler, has the following properties:
+
+* `id` - ID of the associated `Blob`/`File`.
+* `canvas` - `HTMLCanvasElement` element containing the original image data (not resized).
+* `height` - Desired height of the image after the resize operation.
+* `width` - Desired width of the image after the resize operation.
+
+""",
+    [
+        {
+            "name": "resizeInfo",
+            "type": "Object",
+            "description": "Information needed to delegate resizing of an image `Blob` to a custom/third-party scaling library or function."
+        },
+    ])
+}}
+
 {{ api_event("resume", "onResume",
 """ Called just before an upload is resumed. See the [`uploadChunk`](#uploadChunk)
  event for more info on the `chunkData` object.

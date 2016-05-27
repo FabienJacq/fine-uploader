@@ -139,18 +139,16 @@ A `CanvasWrapper` object:
     {
         "name": "customResizer",
         "type": "function",
-        "description": " A `resizeInfo` object will be passed to the supplied function. Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way.
+        "description": "Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way.
 
-A `resizeInfo` object:
+A `resizeInfo` object, which will be passed to the supplied function, contains the following properties:
 
-| Property     | Description |
-| --------     | :---------- |
-| blob         | The original `File` or `Blob` object, if available.
-| height       | Desired height of the image after the resize operation.
-| image        | The original `HTMLImageElement` object, if available.
-| sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
-| targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
-| width        | Desired width of the image after the resize operation. | {: .table }
+* `blob` - The original `File` or `Blob` object, if available.
+* `height` - Desired height of the image after the resize operation.
+* `image` - The original `HTMLImageElement` object, if available.
+* `sourceCanvas` - `HTMLCanvasElement` element containing the original image data (not resized).
+* `targetCanvas` - `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
+* `width` - Desired width of the image after the resize operation.
 "
     }
 ],
@@ -381,18 +379,16 @@ A `resizeInfo` object:
     {
         "name": "customResizer",
         "type": "function",
-        "description": "A `resizeInfo` object will be passed to the supplied function. Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way.
+        "description": "Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way.
 
-A `resizeInfo` object:
+A `resizeInfo` object, which will be passed to the supplied function, contains the following properties:
 
-| Property     | Description |
-| --------     | :---------- |
-| blob         | The original `File` or `Blob` object, if available.
-| height       | Desired height of the image after the resize operation.
-| image        | The original `HTMLImageElement` object, if available.
-| sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
-| targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
-| width        | Desired width of the image after the resize operation. | {: .table }
+* `blob` - The original `File` or `Blob` object, if available.
+* `height` - Desired height of the image after the resize operation.
+* `image` - The original `HTMLImageElement` object, if available.
+* `sourceCanvas` - `HTMLCanvasElement` element containing the original image data (not resized).
+* `targetCanvas` - `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
+* `width` - Desired width of the image after the resize operation.
 "
     }
 ],

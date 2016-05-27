@@ -113,8 +113,7 @@ A `CanvasWrapper` object:
     }
 ]) }}
 
-{{ api_method("drawThumbnail", "drawThumbnail (id, targetContainer[, maxSize[, fromServer[, customResizer]]])",
-"Draws a thumbnail."
+{{ api_method("drawThumbnail", "drawThumbnail (id, targetContainer[, maxSize[, fromServer[, customResizer]]])", "Draws a thumbnail.",
 [
     {
         "name": "id",

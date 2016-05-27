@@ -114,7 +114,19 @@ A `CanvasWrapper` object:
 ]) }}
 
 {{ api_method("drawThumbnail", "drawThumbnail (id, targetContainer[, maxSize[, fromServer[, customResizer]]])",
-"Draws a thumbnail.",
+"Draws a thumbnail.
+
+        A `resizeInfo` object:
+
+        | Property     | Description |
+        | --------     | :---------- |
+        | blob         | The original `File` or `Blob` object, if available.
+        | height       | Desired height of the image after the resize operation.
+        | image        | The original `HTMLImageElement` object, if available.
+        | sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
+        | targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
+        | width        | Desired width of the image after the resize operation. | {: .table }"
+",
 [
     {
         "name": "id",
@@ -139,16 +151,7 @@ A `CanvasWrapper` object:
     {
         "name": "customResizer",
         "type": "function",
-        "description": "Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way. A `resizeInfo` object, which will be passed to the supplied function, contains the following properties:
-
-        | Property     | Description |
-        | --------     | :---------- |
-        | blob         | The original `File` or `Blob` object, if available.
-        | height       | Desired height of the image after the resize operation.
-        | image        | The original `HTMLImageElement` object, if available.
-        | sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
-        | targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
-        | width        | Desired width of the image after the resize operation. {: .table }"
+        "description": " A `resizeInfo` object will be passed to the supplied function. Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way."
     }
 ],
 [
@@ -363,7 +366,19 @@ A `CanvasWrapper` object:
     }
 ], null) }}
 
-{{ api_method("scaleImage", "scaleImage (id, options[, customResizer])", "Generates a scaled version of a submitted image file.",
+{{ api_method("scaleImage", "scaleImage (id, options[, customResizer])", "Generates a scaled version of a submitted image file.
+
+        A `resizeInfo` object:
+
+        | Property     | Description |
+        | --------     | :---------- |
+        | blob         | The original `File` or `Blob` object, if available.
+        | height       | Desired height of the image after the resize operation.
+        | image        | The original `HTMLImageElement` object, if available.
+        | sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
+        | targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
+        | width        | Desired width of the image after the resize operation. | {: .table }"
+",
 [
     {
         "name": "id",
@@ -378,16 +393,7 @@ A `CanvasWrapper` object:
     {
         "name": "customResizer",
         "type": "function",
-        "description": "Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way. A `resizeInfo` object, which will be passed to the supplied function, contains the following properties:
-
-        | Property     | Description |
-        | --------     | :---------- |
-        | blob         | The original `File` or `Blob` object, if available.
-        | height       | Desired height of the image after the resize operation.
-        | image        | The original `HTMLImageElement` object, if available.
-        | sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
-        | targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
-        | width        | Desired width of the image after the resize operation. {: .table }"
+        "description": "A `resizeInfo` object will be passed to the supplied function. Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way."
     }
 ],
 [

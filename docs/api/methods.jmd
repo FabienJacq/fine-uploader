@@ -125,7 +125,7 @@ A `CanvasWrapper` object:
         | image        | The original `HTMLImageElement` object, if available.
         | sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
         | targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
-        | width        | Desired width of the image after the resize operation. | {: .table }"
+        | width        | Desired width of the image after the resize operation. | {: .table }
 ",
 [
     {
@@ -377,7 +377,7 @@ A `CanvasWrapper` object:
         | image        | The original `HTMLImageElement` object, if available.
         | sourceCanvas | `HTMLCanvasElement` element containing the original image data (not resized).
         | targetCanvas | `HTMLCanvasElement` element containing the `HTMLCanvasElement` that should contain the resized image.
-        | width        | Desired width of the image after the resize operation. | {: .table }"
+        | width        | Desired width of the image after the resize operation. | {: .table }
 ",
 [
     {

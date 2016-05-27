@@ -64,8 +64,7 @@
                 onDeleteComplete: function(id, xhrOrXdr, isError) {},
                 onPasteReceived: function(blob) {},
                 onStatusChange: function(id, oldStatus, newStatus) {},
-                onSessionRequestComplete: function(response, success, xhrOrXdr) {},
-                onResizeImage: function(resizeInfo) {}
+                onSessionRequestComplete: function(response, success, xhrOrXdr) {}
             },
 
             messages: {
@@ -195,6 +194,8 @@
 
             // scale images client side, upload a new file for each scaled version
             scaling: {
+                customResizer: null,
+
                 // send the original file as well
                 sendOriginal: true,
 

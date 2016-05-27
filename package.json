@@ -71,6 +71,7 @@
     "karma-spec-reporter": "0.0.13",
     "npm": "^2.1.17",
     "optimist": "0.6.0",
+    "pica": "latest",
     "request": "2.21.0",
     "semver": "2.0.x",
     "string.prototype.endswith": "0.2.0",

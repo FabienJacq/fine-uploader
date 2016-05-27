@@ -72,12 +72,19 @@
     /**
      * Rendering image element (with resizing) and get its data URL
      */
-    function renderImageToDataURL(img, options, doSquash) {
+    function renderImageToDataURL(img, blob, options, doSquash) {
         var canvas = document.createElement("canvas"),
-            mime = options.mime || "image/jpeg";
+            mime = options.mime || "image/jpeg",
+            promise = new qq.Promise();
 
-        renderImageToCanvas(img, canvas, options, doSquash);
-        return canvas.toDataURL(mime, options.quality || 0.8);
+        renderImageToCanvas(img, blob, canvas, options, doSquash)
+            .then(function() {
+                promise.success(
+                    canvas.toDataURL(mime, options.quality || 0.8)
+                );
+            })
+
+        return promise;
     }
 
     function maybeCalculateDownsampledDimensions(spec) {
@@ -98,13 +105,27 @@
     /**
      * Rendering image element (with resizing) into the canvas element
      */
-    function renderImageToCanvas(img, canvas, options, doSquash) {
+    function renderImageToCanvas(img, blob, canvas, options, doSquash) {
         var iw = img.naturalWidth,
             ih = img.naturalHeight,
             width = options.width,
             height = options.height,
             ctx = canvas.getContext("2d"),
+            promise = new qq.Promise(),
             modifiedDimensions;
+
+        if (options.resize) {
+            return renderImageToCanvasWithCustomResizer({
+                blob: blob,
+                canvas: canvas,
+                image: img,
+                imageHeight: ih,
+                imageWidth: iw,
+                resize: options.resize,
+                targetHeight: height,
+                targetWidth: width
+            })
+        }
 
         ctx.save();
 
@@ -117,7 +138,7 @@
             if (modifiedDimensions) {
                 qq.log(qq.format("Had to reduce dimensions due to device limitations from {}w / {}h to {}w / {}h",
                     width, height, modifiedDimensions.newWidth, modifiedDimensions.newHeight),
-                "warn");
+                    "warn");
 
                 width = modifiedDimensions.newWidth;
                 height = modifiedDimensions.newHeight;
@@ -149,7 +170,7 @@
 
                 while (sy < ih) {
                     sx = 0,
-                    dx = 0;
+                        dx = 0;
                     while (sx < iw) {
                         tmpCtx.clearRect(0, 0, d, d);
                         tmpCtx.drawImage(img, -sx, -sy);
@@ -169,6 +190,49 @@
         }
 
         canvas.qqImageRendered && canvas.qqImageRendered();
+        promise.success();
+
+        return promise;
+    }
+
+    function renderImageToCanvasWithCustomResizer(resizeInfo) {
+        var blob = resizeInfo.blob,
+            image = resizeInfo.image,
+            imageHeight = resizeInfo.imageHeight,
+            imageWidth = resizeInfo.imageWidth,
+            promise = new qq.Promise(),
+            resize = resizeInfo.resize,
+            sourceCanvas = document.createElement("canvas"),
+            sourceCanvasContext = sourceCanvas.getContext("2d"),
+            targetCanvas = resizeInfo.canvas,
+            targetHeight = resizeInfo.targetHeight,
+            targetWidth = resizeInfo.targetWidth;
+
+        sourceCanvas.height = imageHeight;
+        sourceCanvas.width = imageWidth;
+
+        targetCanvas.height = targetHeight;
+        targetCanvas.width = targetWidth;
+
+        sourceCanvasContext.drawImage(image, 0, 0);
+
+        resize({
+            blob: blob,
+            height: targetHeight,
+            image: image,
+            sourceCanvas: sourceCanvas,
+            targetCanvas: targetCanvas,
+            width: targetWidth
+        })
+            .then(
+                function success() {
+                    targetCanvas.qqImageRendered && targetCanvas.qqImageRendered();
+                    promise.success();
+                },
+                promise.failure
+            )
+
+        return promise;
     }
 
     /**
@@ -315,11 +379,14 @@
         if (tagName === "img") {
             (function() {
                 var oldTargetSrc = target.src;
-                target.src = renderImageToDataURL(self.srcImage, opt, doSquash);
-                oldTargetSrc === target.src && target.onload();
+                renderImageToDataURL(self.srcImage, self.blob, opt, doSquash)
+                    .then(function(dataUri) {
+                        target.src = dataUri;
+                        oldTargetSrc === target.src && target.onload();
+                    });
             }())
         } else if (tagName === "canvas") {
-            renderImageToCanvas(this.srcImage, target, opt, doSquash);
+            renderImageToCanvas(this.srcImage, this.blob, target, opt, doSquash);
         }
         if (typeof this.onrender === "function") {
             this.onrender(target);

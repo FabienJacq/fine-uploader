@@ -33,7 +33,6 @@ promise instance (see individual event docs for more details):
 * `onCancel`
 * `onCredentialsExpired`
 * `onPasteReceived`
-* `onResizeImage`
 * `onSubmit`
 * `onSubmitDelete`
 * `onValidate`

@@ -135,7 +135,7 @@ A `CanvasWrapper` object:
         "name": "fromServer",
         "type": "Boolean",
         "description": "`true` if the image data will come as a response from the server rather than be generated client-side."
-    }
+    },
     {
         "name": "customResizer",
         "type": "function",

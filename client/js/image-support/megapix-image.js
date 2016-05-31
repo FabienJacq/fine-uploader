@@ -114,6 +114,8 @@
             promise = new qq.Promise(),
             modifiedDimensions;
 
+        ctx.save();
+
         if (options.resize) {
             return renderImageToCanvasWithCustomResizer({
                 blob: blob,
@@ -121,13 +123,12 @@
                 image: img,
                 imageHeight: ih,
                 imageWidth: iw,
+                orientation: options.orientation,
                 resize: options.resize,
                 targetHeight: height,
                 targetWidth: width
             })
         }
-
-        ctx.save();
 
         if (!qq.supportedFeatures.unlimitedScaledImageSize) {
             modifiedDimensions = maybeCalculateDownsampledDimensions({
@@ -169,8 +170,8 @@
                 tmpCtx = tmpCanvas.getContext("2d");
 
                 while (sy < ih) {
-                    sx = 0,
-                        dx = 0;
+                    sx = 0;
+                    dx = 0;
                     while (sx < iw) {
                         tmpCtx.clearRect(0, 0, d, d);
                         tmpCtx.drawImage(img, -sx, -sy);
@@ -200,6 +201,7 @@
             image = resizeInfo.image,
             imageHeight = resizeInfo.imageHeight,
             imageWidth = resizeInfo.imageWidth,
+            orientation = resizeInfo.orientation,
             promise = new qq.Promise(),
             resize = resizeInfo.resize,
             sourceCanvas = document.createElement("canvas"),
@@ -208,8 +210,7 @@
             targetHeight = resizeInfo.targetHeight,
             targetWidth = resizeInfo.targetWidth;
 
-        sourceCanvas.height = imageHeight;
-        sourceCanvas.width = imageWidth;
+        transformCoordinate(sourceCanvas, imageWidth, imageHeight, orientation);
 
         targetCanvas.height = targetHeight;
         targetCanvas.width = targetWidth;

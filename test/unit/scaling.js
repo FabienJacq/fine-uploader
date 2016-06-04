@@ -13,6 +13,15 @@ if (qq.supportedFeatures.scaling) {
                         }
                     });
                 }, 10);
+            },
+            typicalCustomResizer = function(resizeInfo) {
+                var promise = new qq.Promise();
+
+                pica.resizeCanvas(resizeInfo.sourceCanvas, resizeInfo.targetCanvas, {}, function() {
+                    promise.success();
+                });
+
+                return promise;
             };
 
         it("is disabled if no sizes are specified", function() {
@@ -148,14 +157,17 @@ if (qq.supportedFeatures.scaling) {
         });
 
         describe("generates simple scaled image tests", function() {
-            function runScaleTest(orient, done) {
-                assert.expect(3, done);
-
+            function runScaleTest(orient, customResizer, done) {
                 var scalerContext = qq.extend({}, qq.Scaler.prototype),
                     scale = qq.bind(qq.Scaler.prototype._generateScaledImage, scalerContext);
 
                 qqtest.downloadFileAsBlob("up.jpg", "image/jpeg").then(function(blob) {
-                    scale({maxSize: 50, orient: orient, log: function(){}}, blob).then(function(scaledBlob) {
+                    scale({
+                        maxSize: 50,
+                        orient: orient,
+                        log: function(){},
+                        customResizeFunction: customResizer
+                    }, blob).then(function(scaledBlob) {
                         var URL = window.URL && window.URL.createObjectURL ? window.URL :
                                   window.webkitURL && window.webkitURL.createObjectURL ? window.webkitURL :
                                   null,
@@ -167,6 +179,7 @@ if (qq.supportedFeatures.scaling) {
                         img.onload = function() {
                             assert.ok(this.width <= 50);
                             assert.ok(this.height <= 50);
+                            done();
                         };
 
                         img.onerror = function() {
@@ -178,13 +191,27 @@ if (qq.supportedFeatures.scaling) {
                 });
             }
 
-            it("generates a properly scaled & oriented image for a reference image", function(done) {
-                runScaleTest(true, done);
+            describe("using built-in resizer code", function() {
+                it("generates a properly scaled & oriented image for a reference image", function(done) {
+                    runScaleTest(true, null, done);
+                });
+
+                it("generates a properly scaled image for a reference image", function(done) {
+                    runScaleTest(false, null, done);
+                });
             });
 
-            it("generates a properly scaled image for a reference image", function(done) {
-                runScaleTest(false, done);
-            });
+            if (!qq.ios()) {
+                describe("using third-party resizer code", function() {
+                    it("generates a properly scaled & oriented image for a reference image", function(done) {
+                        runScaleTest(true, typicalCustomResizer, done);
+                    });
+
+                    it("generates a properly scaled image for a reference image", function(done) {
+                        runScaleTest(false, typicalCustomResizer, done);
+                    });
+                })
+            }
         });
 
 
@@ -257,74 +284,85 @@ if (qq.supportedFeatures.scaling) {
             });
         });
 
-        it("uploads scaled files as expected: non-chunked, default options", function(done) {
-            assert.expect(39, done);
+        describe("scaled files uploads (non-chunked, default options)", function() {
+            function runTest(customResizer, done) {
+                assert.expect(39, done);
 
-            var referenceFileSize,
-                sizes = [
-                    {
-                        name: "small",
-                        maxSize: 50
-                    },
-                    {
-                        name: "medium",
-                        maxSize: 400
-                    }
-                ],
-                expectedUploadCallbacks = [
-                    {id: 0, name: "up (small).jpeg"},
-                    {id: 1, name: "up (medium).jpeg"},
-                    {id: 2, name: "up.jpeg"},
-                    {id: 3, name: "up2 (small).jpeg"},
-                    {id: 4, name: "up2 (medium).jpeg"},
-                    {id: 5, name: "up2.jpeg"}
-                ],
-                actualUploadCallbacks = [],
-                uploader = new qq.FineUploaderBasic({
-                    request: {endpoint: "test/uploads"},
-                    scaling: {
-                        sizes: sizes
-                    },
-                    callbacks: {
-                        onUpload: function(id, name) {
-                            assert.ok(uploader.getSize(id) > 0, "Blob size is not greater than 0");
-                            assert.ok(qq.isBlob(uploader.getFile(id)), "file is not a Blob");
-                            assert.equal(uploader.getFile(id).size, referenceFileSize);
-
-                            actualUploadCallbacks.push({id: id, name: name});
-                            setTimeout(function() {
-                                var req = fileTestHelper.getRequests()[id],
-                                    parentUuid = req.requestBody.fields.qqparentuuid,
-                                    parentSize = req.requestBody.fields.qqparentsize,
-                                    parentId = uploader.getParentId(id),
-                                    file = req.requestBody.fields.qqfile;
-
-                                assert.equal(file.type, "image/jpeg");
-
-                                if (parentId !== null) {
-                                    assert.equal(parentUuid, uploader.getUuid(parentId));
-                                    assert.equal(parentSize, uploader.getSize(parentId));
-                                }
-                                else {
-                                    assert.equal(parentUuid, undefined);
-                                    assert.equal(parentSize, undefined);
-                                }
-
-                                req.respond(200, null, JSON.stringify({success: true}));
-                            }, 10);
+                var referenceFileSize,
+                    sizes = [
+                        {
+                            name: "small",
+                            maxSize: 50
                         },
-                        onAllComplete: function(successful, failed) {
-                            assert.equal(successful.length, 6);
-                            assert.equal(failed.length, 0);
-                            assert.deepEqual(actualUploadCallbacks, expectedUploadCallbacks);
+                        {
+                            name: "medium",
+                            maxSize: 400
                         }
-                    }
-                });
+                    ],
+                    expectedUploadCallbacks = [
+                        {id: 0, name: "up (small).jpeg"},
+                        {id: 1, name: "up (medium).jpeg"},
+                        {id: 2, name: "up.jpeg"},
+                        {id: 3, name: "up2 (small).jpeg"},
+                        {id: 4, name: "up2 (medium).jpeg"},
+                        {id: 5, name: "up2.jpeg"}
+                    ],
+                    actualUploadCallbacks = [],
+                    uploader = new qq.FineUploaderBasic({
+                        request: {endpoint: "test/uploads"},
+                        scaling: {
+                            sizes: sizes,
+                            customResizer: customResizer
+                        },
+                        callbacks: {
+                            onUpload: function(id, name) {
+                                assert.ok(uploader.getSize(id) > 0, "Blob size is not greater than 0");
+                                assert.ok(qq.isBlob(uploader.getFile(id)), "file is not a Blob");
+                                assert.equal(uploader.getFile(id).size, referenceFileSize);
 
-            qqtest.downloadFileAsBlob("up.jpg", "image/jpeg").then(function(blob) {
-                fileTestHelper.mockXhr();
-                referenceFileSize = blob.size;
-                uploader.addFiles([{blob: blob, name: "up.jpeg"}, {blob: blob, name: "up2.jpeg"}]);
+                                actualUploadCallbacks.push({id: id, name: name});
+                                setTimeout(function() {
+                                    var req = fileTestHelper.getRequests()[id],
+                                        parentUuid = req.requestBody.fields.qqparentuuid,
+                                        parentSize = req.requestBody.fields.qqparentsize,
+                                        parentId = uploader.getParentId(id),
+                                        file = req.requestBody.fields.qqfile;
+
+                                    assert.equal(file.type, "image/jpeg");
+
+                                    if (parentId !== null) {
+                                        assert.equal(parentUuid, uploader.getUuid(parentId));
+                                        assert.equal(parentSize, uploader.getSize(parentId));
+                                    }
+                                    else {
+                                        assert.equal(parentUuid, undefined);
+                                        assert.equal(parentSize, undefined);
+                                    }
+
+                                    req.respond(200, null, JSON.stringify({success: true}));
+                                }, 100);
+                            },
+                            onAllComplete: function(successful, failed) {
+                                assert.equal(successful.length, 6);
+                                assert.equal(failed.length, 0);
+                                assert.deepEqual(actualUploadCallbacks, expectedUploadCallbacks);
+                            }
+                        }
+                    });
+
+                qqtest.downloadFileAsBlob("up.jpg", "image/jpeg").then(function(blob) {
+                    fileTestHelper.mockXhr();
+                    referenceFileSize = blob.size;
+                    uploader.addFiles([{blob: blob, name: "up.jpeg"}, {blob: blob, name: "up2.jpeg"}]);
+                });
+            };
+
+            it("uploads as expected with internal resizer code", function(done) {
+                runTest(null, done);
+            });
+
+            it("uploads as expected with third-party resizer code", function(done) {
+                runTest(typicalCustomResizer, done);
             });
         });
 

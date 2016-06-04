@@ -1,4 +1,4 @@
-/* globals describe, it, qq, assert, qqtest, helpme */
+/* globals describe, it, qq, assert, qqtest, helpme, pica */
 if (qq.supportedFeatures.scaling) {
     describe("scaling module tests", function() {
         "use strict";
@@ -210,7 +210,7 @@ if (qq.supportedFeatures.scaling) {
                     it("generates a properly scaled image for a reference image", function(done) {
                         runScaleTest(false, typicalCustomResizer, done);
                     });
-                })
+                });
             }
         });
 
@@ -355,15 +355,17 @@ if (qq.supportedFeatures.scaling) {
                     referenceFileSize = blob.size;
                     uploader.addFiles([{blob: blob, name: "up.jpeg"}, {blob: blob, name: "up2.jpeg"}]);
                 });
-            };
+            }
 
             it("uploads as expected with internal resizer code", function(done) {
                 runTest(null, done);
             });
 
-            it("uploads as expected with third-party resizer code", function(done) {
-                runTest(typicalCustomResizer, done);
-            });
+            if (!qq.ios()) {
+                it("uploads as expected with third-party resizer code", function (done) {
+                    runTest(typicalCustomResizer, done);
+                });
+            }
         });
 
         it("ensure scaled versions of non-JPEGs are always PNGs", function(done) {

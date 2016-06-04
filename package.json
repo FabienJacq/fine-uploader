@@ -85,7 +85,7 @@
     "setup-dev": "(cd test/dev/handlers; curl -sS https://getcomposer.org/installer | php; php composer.phar install)",
     "start-local-dev": "(. test/dev/handlers/s3keys.sh; php -S 0.0.0.0:9090 -t . -c test/dev/handlers/php.ini)",
     "start-c9-dev": "php -S $IP:$PORT -t . -c test/dev/handlers/php.ini",
-    "test": "if test \"$CI\" = \"true\" ; then grunt travis ; else grunt test:firefox ; fi",
+    "test": "if test \"$TRAVIS\" = \"true\" ; then grunt travis ; else grunt test:firefox ; fi",
     "update-dev": "(cd test/dev/handlers; php composer.phar update)"
   },
   "engines" : {

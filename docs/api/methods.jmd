@@ -378,7 +378,7 @@ A `resizeInfo` object, which will be passed to the supplied function, contains t
 * `orient` (boolean, defaults to true)
 * `type` (string, defaults to the type of the reference image)
 * `quality` (number between 0 and 100, defaults to 80)
-* `includeExif` (boolean, defaults to `false`)."
+* `includeExif` (boolean, defaults to `false`).
 * `customResizer` (function) - Ignored if the current browser does not [support image previews](../browser-support.html). If you want to use an alternate library to resize the image, you must contribute a function for this option that returns a `Promise`. Once the resize is complete, your promise must be fulfilled. You may, of course, reject your returned `Promise` is the resize fails in some way.
 A `resizeInfo` object, which will be passed to the supplied function, contains the following properties:
 

@@ -37,6 +37,7 @@ qq.UploadHandlerController = function(o, namespace) {
         setSize: function(id, newSize) {},
         isQueued: function(id) {},
         isPausedQueue: function() {},
+        storeForLater: function(id) {},
         getIdsInProxyGroup: function(id) {},
         getIdsInBatch: function(id) {}
     },

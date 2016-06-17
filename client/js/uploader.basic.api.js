@@ -284,7 +284,7 @@
         },
 
         pauseQueue: function() {
-            this._pausedQueue = true;
+            this._isPausedQueue = true;
         },
 
         pauseUpload: function(id) {
@@ -327,7 +327,7 @@
 
             this._paramsStore.reset();
             this._endpointStore.reset();
-            this._pausedQueue = false;
+            this._isPausedQueue = false;
             this._netUploadedOrQueued = 0;
             this._netUploaded = 0;
             this._uploadData.reset();
@@ -340,6 +340,33 @@
             this._failedSinceLastAllComplete = [];
 
             this._totalProgress && this._totalProgress.reset();
+        },
+
+        resumeQueue: function() {
+            var queuedUploads, idToUpload, index;
+
+            this._isPausedQueue = false;
+
+            queuedUploads = this._uploadData.retrieve({
+                status: [
+                    qq.status.SUBMITTING,
+                    qq.status.SUBMITTED,
+                    qq.status.QUEUED
+                ]
+            });
+
+            if (queuedUploads.length) {
+                for (index = 0; index < queuedUploads.length; index++) {
+                    if (qq.indexOf(this._storedIds, queuedUploads[index].id) === -1) {
+                        this._storedIds.push(queuedUploads[index].id);
+                    }
+                }
+            }
+
+            while (this._storedIds.length) {
+                idToUpload = this._storedIds.shift();
+                this.retry(idToUpload);
+            }
         },
 
         retry: function(id) {
@@ -781,6 +808,12 @@
                             status === qq.status.SUBMITTED ||
                             status === qq.status.UPLOAD_RETRYING ||
                             status === qq.status.PAUSED;
+                    },
+                    isPausedQueue: function() {
+                        return self._isPausedQueue;
+                    },
+                    storeForLater: function(id) {
+                        self._storeForLater(id);
                     },
                     getIdsInProxyGroup: self._uploadData.getIdsInProxyGroup,
                     getIdsInBatch: self._uploadData.getIdsInBatch
@@ -1426,7 +1459,7 @@
                 this._uploadData.setStatus(id, qq.status.DELETE_FAILED);
                 this.log("Delete request for '" + name + "' has failed.", "error");
 
-                // For error reporing, we only have accesss to the response status if this is not
+                // For error reporting, we only have access to the response status if this is not
                 // an `XDomainRequest`.
                 if (xhrOrXdr.withCredentials === undefined) {
                     this._options.callbacks.onError(id, name, "Delete request failed", xhrOrXdr);

@@ -36,6 +36,8 @@ qq.UploadHandlerController = function(o, namespace) {
         getName: function(id) {},
         setSize: function(id, newSize) {},
         isQueued: function(id) {},
+        isPausedQueue: function() {},
+        storeForLater: function(id) {},
         getIdsInProxyGroup: function(id) {},
         getIdsInBatch: function(id) {}
     },
@@ -556,6 +558,11 @@ qq.UploadHandlerController = function(o, namespace) {
         },
 
         start: function(id) {
+            if (options.isPausedQueue()) {
+                options.storeForLater(id);
+                return false;
+            }
+
             var blobToUpload = upload.getProxyOrBlob(id);
 
             if (blobToUpload) {

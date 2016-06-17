@@ -284,7 +284,7 @@
         },
 
         pauseQueue: function() {
-            this._pausedQueue = true;
+            this._isPausedQueue = true;
         },
 
         pauseUpload: function(id) {
@@ -327,7 +327,7 @@
 
             this._paramsStore.reset();
             this._endpointStore.reset();
-            this._pausedQueue = false;
+            this._isPausedQueue = false;
             this._netUploadedOrQueued = 0;
             this._netUploaded = 0;
             this._uploadData.reset();
@@ -340,6 +340,33 @@
             this._failedSinceLastAllComplete = [];
 
             this._totalProgress && this._totalProgress.reset();
+        },
+
+        resumeQueue: function() {
+            var queuedUploads, idToUpload, index;
+
+            this._isPausedQueue = false;
+
+            queuedUploads = this._uploadData.retrieve({
+                status: [
+                    qq.status.SUBMITTING,
+                    qq.status.SUBMITTED,
+                    qq.status.QUEUED
+                ]
+            });
+
+            if (queuedUploads.length) {
+                for (index = 0; index < queuedUploads.length; index++) {
+                    if (qq.indexOf(this._storedIds, queuedUploads[index].id) === -1) {
+                        this._storedIds.push(queuedUploads[index].id);
+                    }
+                }
+            }
+
+            while (this._storedIds.length) {
+                idToUpload = this._storedIds.shift();
+                this.retry(idToUpload);
+            }
         },
 
         retry: function(id) {
@@ -395,14 +422,6 @@
 
         setUuid: function(id, newUuid) {
             return this._uploadData.uuidChanged(id, newUuid);
-        },
-
-        unpauseQueue: function() {
-            this._pausedQueue = false;
-
-            if (this._storedIds.length !== 0) {
-                this.uploadStoredFiles();
-            }
         },
 
         uploadStoredFiles: function() {
@@ -781,6 +800,12 @@
                             status === qq.status.SUBMITTED ||
                             status === qq.status.UPLOAD_RETRYING ||
                             status === qq.status.PAUSED;
+                    },
+                    isPausedQueue: function() {
+                        return self._isPausedQueue;
+                    },
+                    storeForLater: function(id) {
+                        self._storeForLater(id);
                     },
                     getIdsInProxyGroup: self._uploadData.getIdsInProxyGroup,
                     getIdsInBatch: self._uploadData.getIdsInBatch
@@ -1750,12 +1775,8 @@
         },
 
         _uploadFile: function(id) {
-            if (this._pausedQueue || !this._handler.upload(id)) {
+            if (!this._handler.upload(id)) {
                 this._uploadData.setStatus(id, qq.status.QUEUED);
-
-                if (this._pausedQueue) {
-                    this._storeForLater(id);
-                }
             }
         },
 

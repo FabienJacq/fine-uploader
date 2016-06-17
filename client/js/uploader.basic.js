@@ -237,7 +237,7 @@
         this._preventRetries = [];
         this._thumbnailUrls = [];
 
-        this._pausedQueue = false;
+        this._isPausedQueue = false;
         this._netUploadedOrQueued = 0;
         this._netUploaded = 0;
         this._uploadData = this._createUploadDataTracker();

@@ -37,7 +37,6 @@ qq.UploadHandlerController = function(o, namespace) {
         setSize: function(id, newSize) {},
         isQueued: function(id) {},
         isPausedQueue: function() {},
-        storeForLater: function(id) {},
         getIdsInProxyGroup: function(id) {},
         getIdsInBatch: function(id) {}
     },
@@ -285,10 +284,13 @@ qq.UploadHandlerController = function(o, namespace) {
             else if (allowNext && connectionsIndex >= 0) {
                 connectionManager._open.splice(connectionsIndex, 1);
 
-                nextId = connectionManager._waiting.shift();
-                if (nextId >= 0) {
-                    connectionManager._open.push(nextId);
-                    upload.start(nextId);
+                if (!options.isPausedQueue()) {
+                    nextId = connectionManager._waiting.shift();
+
+                    if (nextId >= 0) {
+                        connectionManager._open.push(nextId);
+                        upload.start(nextId);
+                    }
                 }
             }
         },
@@ -558,11 +560,6 @@ qq.UploadHandlerController = function(o, namespace) {
         },
 
         start: function(id) {
-            if (options.isPausedQueue()) {
-                options.storeForLater(id);
-                return false;
-            }
-
             var blobToUpload = upload.getProxyOrBlob(id);
 
             if (blobToUpload) {

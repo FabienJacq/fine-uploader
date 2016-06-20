@@ -343,29 +343,10 @@
         },
 
         resumeQueue: function() {
-            var queuedUploads, idToUpload, index;
-
             this._isPausedQueue = false;
 
-            queuedUploads = this._uploadData.retrieve({
-                status: [
-                    qq.status.SUBMITTING,
-                    qq.status.SUBMITTED,
-                    qq.status.QUEUED
-                ]
-            });
-
-            if (queuedUploads.length) {
-                for (index = 0; index < queuedUploads.length; index++) {
-                    if (qq.indexOf(this._storedIds, queuedUploads[index].id) === -1) {
-                        this._storedIds.push(queuedUploads[index].id);
-                    }
-                }
-            }
-
-            while (this._storedIds.length) {
-                idToUpload = this._storedIds.shift();
-                this.retry(idToUpload);
+            if (this._storedIds.length) {
+                this._uploadStoredFiles();
             }
         },
 
@@ -803,9 +784,6 @@
                     },
                     isPausedQueue: function() {
                         return self._isPausedQueue;
-                    },
-                    storeForLater: function(id) {
-                        self._storeForLater(id);
                     },
                     getIdsInProxyGroup: self._uploadData.getIdsInProxyGroup,
                     getIdsInBatch: self._uploadData.getIdsInBatch

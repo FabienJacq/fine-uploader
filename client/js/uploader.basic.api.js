@@ -328,6 +328,7 @@
             this._paramsStore.reset();
             this._endpointStore.reset();
             this._isPausedQueue = false;
+            this._pausedId = -1;
             this._netUploadedOrQueued = 0;
             this._netUploaded = 0;
             this._uploadData.reset();
@@ -344,6 +345,12 @@
 
         resumeQueue: function() {
             this._isPausedQueue = false;
+
+            // If upload has been paused, resume from the id it has been paused
+            // This will also upload all the files in the _waiting queue
+            if (this._pausedId !== -1) {
+                this._uploadFile(this._pausedId);
+            }
 
             if (this._storedIds.length) {
                 this._uploadStoredFiles();
@@ -784,6 +791,9 @@
                     },
                     isPausedQueue: function() {
                         return self._isPausedQueue;
+                    },
+                    setPausedId: function(id) {
+                        self._pausedId = id;
                     },
                     getIdsInProxyGroup: self._uploadData.getIdsInProxyGroup,
                     getIdsInBatch: self._uploadData.getIdsInBatch

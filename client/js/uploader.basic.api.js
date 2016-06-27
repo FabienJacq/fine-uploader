@@ -328,6 +328,7 @@
             this._paramsStore.reset();
             this._endpointStore.reset();
             this._isPausedQueue = false;
+            this._pausedId = -1;
             this._netUploadedOrQueued = 0;
             this._netUploaded = 0;
             this._uploadData.reset();
@@ -343,29 +344,16 @@
         },
 
         resumeQueue: function() {
-            var queuedUploads, idToUpload, index;
-
             this._isPausedQueue = false;
 
-            queuedUploads = this._uploadData.retrieve({
-                status: [
-                    qq.status.SUBMITTING,
-                    qq.status.SUBMITTED,
-                    qq.status.QUEUED
-                ]
-            });
-
-            if (queuedUploads.length) {
-                for (index = 0; index < queuedUploads.length; index++) {
-                    if (qq.indexOf(this._storedIds, queuedUploads[index].id) === -1) {
-                        this._storedIds.push(queuedUploads[index].id);
-                    }
-                }
+            // If upload has been paused, resume from the id it has been paused
+            // This will also upload all the files in the _waiting queue
+            if (this._pausedId !== -1) {
+                this._uploadFile(this._pausedId);
             }
 
-            while (this._storedIds.length) {
-                idToUpload = this._storedIds.shift();
-                this.retry(idToUpload);
+            if (this._storedIds.length) {
+                this._uploadStoredFiles();
             }
         },
 
@@ -812,8 +800,8 @@
                     isPausedQueue: function() {
                         return self._isPausedQueue;
                     },
-                    storeForLater: function(id) {
-                        self._storeForLater(id);
+                    setPausedId: function(id) {
+                        self._pausedId = id;
                     },
                     getIdsInProxyGroup: self._uploadData.getIdsInProxyGroup,
                     getIdsInBatch: self._uploadData.getIdsInBatch

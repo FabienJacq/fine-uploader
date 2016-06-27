@@ -37,7 +37,7 @@ qq.UploadHandlerController = function(o, namespace) {
         setSize: function(id, newSize) {},
         isQueued: function(id) {},
         isPausedQueue: function() {},
-        storeForLater: function(id) {},
+        setPausedId: function(id) {},
         getIdsInProxyGroup: function(id) {},
         getIdsInBatch: function(id) {}
     },
@@ -247,6 +247,7 @@ qq.UploadHandlerController = function(o, namespace) {
         _open: [],
         _openChunks: {},
         _waiting: [],
+        _hasBeenPaused: false,
 
         available: function() {
             var max = options.maxConnections,
@@ -286,9 +287,27 @@ qq.UploadHandlerController = function(o, namespace) {
                 connectionManager._open.splice(connectionsIndex, 1);
 
                 nextId = connectionManager._waiting.shift();
+
                 if (nextId >= 0) {
-                    connectionManager._open.push(nextId);
-                    upload.start(nextId);
+                    if (options.isPausedQueue()) {
+                        // Check that the upload hasn't been paused already because of parallel uploads
+                        if (connectionManager._hasBeenPaused) {
+                            // If it has, the id has been removed of the _waiting for nothing, we have to put it back
+                            connectionManager._waiting.unshift(nextId);
+                        } else {
+                            connectionManager._hasBeenPaused = true;
+                            options.setPausedId(nextId);
+                        }
+                    } else {
+                        if (connectionManager._hasBeenPaused) {
+                            // Upload isn't paused anymore, let's reset variables
+                            connectionManager._hasBeenPaused = false;
+                            options.setPausedId(-1);
+                        }
+
+                        connectionManager._open.push(nextId);
+                        upload.start(nextId);
+                    }
                 }
             }
         },
@@ -558,11 +577,6 @@ qq.UploadHandlerController = function(o, namespace) {
         },
 
         start: function(id) {
-            if (options.isPausedQueue()) {
-                options.storeForLater(id);
-                return false;
-            }
-
             var blobToUpload = upload.getProxyOrBlob(id);
 
             if (blobToUpload) {

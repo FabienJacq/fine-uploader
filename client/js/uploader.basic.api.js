@@ -351,10 +351,6 @@
             if (this._pausedId !== -1) {
                 this._uploadFile(this._pausedId);
             }
-
-            if (this._storedIds.length) {
-                this._uploadStoredFiles();
-            }
         },
 
         retry: function(id) {

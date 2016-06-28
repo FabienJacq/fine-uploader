@@ -1908,6 +1908,7 @@ qq.status = {
             this._paramsStore.reset();
             this._endpointStore.reset();
             this._isPausedQueue = false;
+            this._pausedId = -1;
             this._netUploadedOrQueued = 0;
             this._netUploaded = 0;
             this._uploadData.reset();
@@ -1923,29 +1924,16 @@ qq.status = {
         },
 
         resumeQueue: function() {
-            var queuedUploads, idToUpload, index;
-
             this._isPausedQueue = false;
 
-            queuedUploads = this._uploadData.retrieve({
-                status: [
-                    qq.status.SUBMITTING,
-                    qq.status.SUBMITTED,
-                    qq.status.QUEUED
-                ]
-            });
-
-            if (queuedUploads.length) {
-                for (index = 0; index < queuedUploads.length; index++) {
-                    if (qq.indexOf(this._storedIds, queuedUploads[index].id) === -1) {
-                        this._storedIds.push(queuedUploads[index].id);
-                    }
-                }
+            // If upload has been paused, resume from the id it has been paused
+            // This will also upload all the files in the _waiting queue
+            if (this._pausedId !== -1) {
+                this._uploadFile(this._pausedId);
             }
 
-            while (this._storedIds.length) {
-                idToUpload = this._storedIds.shift();
-                this.retry(idToUpload);
+            if (this._storedIds.length) {
+                this._uploadStoredFiles();
             }
         },
 
@@ -2392,8 +2380,8 @@ qq.status = {
                     isPausedQueue: function() {
                         return self._isPausedQueue;
                     },
-                    storeForLater: function(id) {
-                        self._storeForLater(id);
+                    setPausedId: function(id) {
+                        self._pausedId = id;
                     },
                     getIdsInProxyGroup: self._uploadData.getIdsInProxyGroup,
                     getIdsInBatch: self._uploadData.getIdsInBatch
@@ -3727,6 +3715,7 @@ qq.status = {
         this._thumbnailUrls = [];
 
         this._isPausedQueue = false;
+        this._pausedId = -1;
         this._netUploadedOrQueued = 0;
         this._netUploaded = 0;
         this._uploadData = this._createUploadDataTracker();
@@ -4305,7 +4294,7 @@ qq.UploadHandlerController = function(o, namespace) {
         setSize: function(id, newSize) {},
         isQueued: function(id) {},
         isPausedQueue: function() {},
-        storeForLater: function(id) {},
+        setPausedId: function(id) {},
         getIdsInProxyGroup: function(id) {},
         getIdsInBatch: function(id) {}
     },
@@ -4515,6 +4504,7 @@ qq.UploadHandlerController = function(o, namespace) {
         _open: [],
         _openChunks: {},
         _waiting: [],
+        _hasBeenPaused: false,
 
         available: function() {
             var max = options.maxConnections,
@@ -4554,9 +4544,27 @@ qq.UploadHandlerController = function(o, namespace) {
                 connectionManager._open.splice(connectionsIndex, 1);
 
                 nextId = connectionManager._waiting.shift();
+
                 if (nextId >= 0) {
-                    connectionManager._open.push(nextId);
-                    upload.start(nextId);
+                    if (options.isPausedQueue()) {
+                        // Check that the upload hasn't been paused already because of parallel uploads
+                        if (connectionManager._hasBeenPaused) {
+                            // If it has, the id has been removed of the _waiting for nothing, we have to put it back
+                            connectionManager._waiting.unshift(nextId);
+                        } else {
+                            connectionManager._hasBeenPaused = true;
+                            options.setPausedId(nextId);
+                        }
+                    } else {
+                        if (connectionManager._hasBeenPaused) {
+                            // Upload isn't paused anymore, let's reset variables
+                            connectionManager._hasBeenPaused = false;
+                            options.setPausedId(-1);
+                        }
+
+                        connectionManager._open.push(nextId);
+                        upload.start(nextId);
+                    }
                 }
             }
         },
@@ -4826,11 +4834,6 @@ qq.UploadHandlerController = function(o, namespace) {
         },
 
         start: function(id) {
-            if (options.isPausedQueue()) {
-                options.storeForLater(id);
-                return false;
-            }
-
             var blobToUpload = upload.getProxyOrBlob(id);
 
             if (blobToUpload) {
@@ -12501,4 +12504,4 @@ else {
 }
 }(window));
 
-/*! 2016-06-17 */
+/*! 2016-06-28 */

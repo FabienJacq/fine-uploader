@@ -412,14 +412,6 @@
             return this._uploadData.uuidChanged(id, newUuid);
         },
 
-        unpauseQueue: function() {
-            this._pausedQueue = false;
-
-            if (this._storedIds.length !== 0) {
-                this.uploadStoredFiles();
-            }
-        },
-
         uploadStoredFiles: function() {
             if (this._storedIds.length === 0) {
                 this._itemError("noFilesError");

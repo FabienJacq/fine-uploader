@@ -351,6 +351,10 @@
             // This will also upload all the files in the _waiting queue
             if (this._pausedId !== -1) {
                 this._uploadFile(this._pausedId);
+
+                // Upload isn't paused anymore, let's reset variables
+                this._pausedId = -1;
+                this._handler.connectionManager._hasBeenPaused = false;
             }
         },
 

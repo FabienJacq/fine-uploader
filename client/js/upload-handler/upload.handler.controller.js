@@ -299,12 +299,6 @@ qq.UploadHandlerController = function(o, namespace) {
                             options.setPausedId(nextId);
                         }
                     } else {
-                        if (connectionManager._hasBeenPaused) {
-                            // Upload isn't paused anymore, let's reset variables
-                            connectionManager._hasBeenPaused = false;
-                            options.setPausedId(-1);
-                        }
-
                         connectionManager._open.push(nextId);
                         upload.start(nextId);
                     }
@@ -590,6 +584,7 @@ qq.UploadHandlerController = function(o, namespace) {
     };
 
     qq.extend(this, {
+        connectionManager: connectionManager,
         /**
          * Adds file or file input to the queue
          **/

@@ -584,7 +584,6 @@ qq.UploadHandlerController = function(o, namespace) {
     };
 
     qq.extend(this, {
-        connectionManager: connectionManager,
         /**
          * Adds file or file input to the queue
          **/
@@ -685,6 +684,10 @@ qq.UploadHandlerController = function(o, namespace) {
             controller.cancelAll();
             connectionManager.reset();
             handler.reset();
+        },
+
+        resetPausedUpload: function() {
+            connectionManager._hasBeenPaused = false;
         },
 
         expunge: function(id) {

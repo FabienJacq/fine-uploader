@@ -354,7 +354,7 @@
 
                 // Upload isn't paused anymore, let's reset variables
                 this._pausedId = -1;
-                this._handler.connectionManager._hasBeenPaused = false;
+                this._handler.resetPausedUpload();
             }
         },
 

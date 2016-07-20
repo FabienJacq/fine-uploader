@@ -1931,6 +1931,10 @@ qq.status = {
             // This will also upload all the files in the _waiting queue
             if (this._pausedId !== -1) {
                 this._uploadFile(this._pausedId);
+
+                // Upload isn't paused anymore, let's reset variables
+                this._pausedId = -1;
+                this._handler.resetPausedUpload();
             }
         },
 
@@ -4547,12 +4551,6 @@ qq.UploadHandlerController = function(o, namespace) {
                             options.setPausedId(nextId);
                         }
                     } else {
-                        if (connectionManager._hasBeenPaused) {
-                            // Upload isn't paused anymore, let's reset variables
-                            connectionManager._hasBeenPaused = false;
-                            options.setPausedId(-1);
-                        }
-
                         connectionManager._open.push(nextId);
                         upload.start(nextId);
                     }
@@ -4938,6 +4936,10 @@ qq.UploadHandlerController = function(o, namespace) {
             controller.cancelAll();
             connectionManager.reset();
             handler.reset();
+        },
+
+        resetPausedUpload: function() {
+            connectionManager._hasBeenPaused = false;
         },
 
         expunge: function(id) {
@@ -15885,4 +15887,4 @@ else {
 }
 }(window));
 
-/*! 2016-07-19 */
+/*! 2016-07-20 */

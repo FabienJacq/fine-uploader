@@ -3344,12 +3344,8 @@ qq.status = {
         },
 
         _uploadFile: function(id) {
-            if (this._pausedQueue || !this._handler.upload(id)) {
+            if (!this._handler.upload(id)) {
                 this._uploadData.setStatus(id, qq.status.QUEUED);
-
-                if (this._pausedQueue) {
-                    this._storeForLater(id);
-                }
             }
         },
 
@@ -16920,4 +16916,4 @@ else {
 }
 }(window));
 
-/*! 2016-07-20 */
+/*! 2016-07-27 */

@@ -352,9 +352,8 @@
             if (this._pausedId !== -1) {
                 this._uploadFile(this._pausedId);
 
-                // Upload isn't paused anymore, let's reset variables
+                // Upload isn't paused anymore, let's reset the _pausedId
                 this._pausedId = -1;
-                this._handler.resetPausedUpload();
             }
         },
 
@@ -792,6 +791,9 @@
                     },
                     isPausedQueue: function() {
                         return self._isPausedQueue;
+                    },
+                    getPausedId: function() {
+                        return self._pausedId;
                     },
                     setPausedId: function(id) {
                         self._pausedId = id;

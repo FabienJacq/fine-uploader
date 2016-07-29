@@ -37,6 +37,7 @@ qq.UploadHandlerController = function(o, namespace) {
         setSize: function(id, newSize) {},
         isQueued: function(id) {},
         isPausedQueue: function() {},
+        getPausedId: function() {},
         setPausedId: function(id) {},
         getIdsInProxyGroup: function(id) {},
         getIdsInBatch: function(id) {}
@@ -247,7 +248,6 @@ qq.UploadHandlerController = function(o, namespace) {
         _open: [],
         _openChunks: {},
         _waiting: [],
-        _hasBeenPaused: false,
 
         available: function() {
             var max = options.maxConnections,
@@ -291,11 +291,10 @@ qq.UploadHandlerController = function(o, namespace) {
                 if (nextId >= 0) {
                     if (options.isPausedQueue()) {
                         // Check that the upload hasn't been paused already because of parallel uploads
-                        if (connectionManager._hasBeenPaused) {
+                        if (options.getPausedId() !== -1) {
                             // If it has, the id has been removed of the _waiting for nothing, we have to put it back
                             connectionManager._waiting.unshift(nextId);
                         } else {
-                            connectionManager._hasBeenPaused = true;
                             options.setPausedId(nextId);
                         }
                     } else {
@@ -684,10 +683,6 @@ qq.UploadHandlerController = function(o, namespace) {
             controller.cancelAll();
             connectionManager.reset();
             handler.reset();
-        },
-
-        resetPausedUpload: function() {
-            connectionManager._hasBeenPaused = false;
         },
 
         expunge: function(id) {
